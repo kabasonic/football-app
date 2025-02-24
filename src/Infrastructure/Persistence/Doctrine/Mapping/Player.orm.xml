@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping
+    xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+    http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd"
+>
+  <entity name="App\Domain\Models\Team\Entity\Player" table="players">
+    <id name="id" type="string" length="26">
+      <generator strategy="NONE"/>
+    </id>
+    <field name="firstName" length="100"/>
+    <field name="lastName" length="100"/>
+    <field name="age" type="integer"/>
+    <field name="position" length="150"/>
+    <many-to-one field="team" target-entity="App\Domain\Models\Team\Entity\Team" inversed-by="players">
+      <join-column name="team_id" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
+    </many-to-one>
+  </entity>
+</doctrine-mapping>

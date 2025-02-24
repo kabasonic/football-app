@@ -1,0 +1,17 @@
+monolog:
+  channels:
+    - notification
+
+  handlers:
+
+    notification_handler:
+      type: stream
+      path: '%kernel.logs_dir%/notification.log'
+      level: info
+      channels: [notification]
+
+    main:
+      type: stream
+      path: '%kernel.logs_dir%/dev.log'
+      level: debug
+      channels: ['!notification']

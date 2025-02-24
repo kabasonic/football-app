@@ -12,6 +12,10 @@ RUN if [ ${INSTALL_XDEBUG} = true ]; \
 
 COPY ./docker/php8.2/dev/php-fpm/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
+RUN apk add --no-cache && docker-php-ext-install \
+        pdo_mysql \
+        mysqli;
+
 # Configure non-root user.
 ARG PUID=1000
 ARG PGID=1000

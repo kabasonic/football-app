@@ -1,5 +1,39 @@
-controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
+teams_list:
+    path: /teams
+    controller: App\Infrastructure\Controller\Team\TeamController::list
+    methods: [GET]
+
+team_details:
+    path: /teams/{teamId}
+    controller: App\Infrastructure\Controller\Team\TeamController::details
+    methods: [GET]
+
+create_team:
+    path: /teams
+    controller: App\Infrastructure\Controller\Team\TeamController::create
+    methods: [POST]
+
+update_team:
+    path: /teams/{teamId}
+    controller: App\Infrastructure\Controller\Team\TeamController::update
+    methods: [PUT]
+
+delete_team:
+    path: /teams/{teamId}
+    controller: App\Infrastructure\Controller\Team\TeamController::delete
+    methods: [DELETE]
+
+add_player:
+    path: /teams/{teamId}/players
+    controller: App\Infrastructure\Controller\Player\PlayerController::add
+    methods: [POST]
+
+remove_player:
+    path: /teams/{teamId}/players/{playerId}
+    controller: App\Infrastructure\Controller\Player\PlayerController::remove
+    methods: [DELETE]
+
+relocate_team:
+    path: /teams/{teamId}/relocate
+    controller: App\Infrastructure\Controller\Team\TeamController::relocate
+    methods: [PUT]

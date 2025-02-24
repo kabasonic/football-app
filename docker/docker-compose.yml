@@ -10,6 +10,8 @@ services:
         - INSTALL_XDEBUG=${INSTALL_XDEBUG}
     environment:
       PHP_IDE_CONFIG: "serverName=bsTaskApp"
+    depends_on:
+      - db
     volumes:
       - ./../:/var/www/
 
@@ -23,3 +25,25 @@ services:
       - ..:/var/www:rw
     depends_on:
       - app
+
+  db:
+    container_name: bs_task_db
+    build:
+      context: ./php8.2/dev/mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - ${FORWARD_DB_PORT:-3306}:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  mysql-data:
+    driver: local
