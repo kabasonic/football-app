@@ -3,6 +3,11 @@
 namespace App\Domain\Models\Team\Entity;
 
 use App\Domain\Event\TeamRelocatedEvent;
+use App\Domain\Exception\InvalidLocationChangeException;
+use App\Domain\Exception\InvalidUlidException;
+use App\Domain\Exception\PlayerNotFoundException;
+use App\Domain\Exception\TeamPlayerLimitExceededException;
+use App\Domain\Models\Team\ValueObject\PlayerId;
 use App\Domain\Models\Team\ValueObject\TeamId;
 use App\Shared\Domain\Aggregate\AggregateRoot;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -25,6 +30,9 @@ class Team extends AggregateRoot
         $this->players = new ArrayCollection();
     }
 
+    /**
+     * @throws InvalidUlidException
+     */
     public function getId(): ?TeamId
     {
         return new TeamId($this->id);
@@ -50,7 +58,7 @@ class Team extends AggregateRoot
         return $this->stadiumName;
     }
 
-    public function getPlayers(): ArrayCollection
+    public function getPlayers(): Collection
     {
         return $this->players;
     }
@@ -75,6 +83,71 @@ class Team extends AggregateRoot
         $this->stadiumName = $stadiumName;
     }
 
+    public function findPlayerById(PlayerId $playerId): ?Player
+    {
+        foreach ($this->players as $player) {
+            if ($playerId->getValue() === $player->getId()->getValue()) {
+                return $player;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @throws TeamPlayerLimitExceededException
+     */
+    public function addPlayer(Player $player): void
+    {
+        if ($this->players->count() >= static::MAX_PLAYERS_COUNT) {
+            throw new TeamPlayerLimitExceededException(static::MAX_PLAYERS_COUNT);
+        }
+
+        $this->players[] = $player;
+        $player->setTeam($this);
+    }
+
+    /**
+     * @throws PlayerNotFoundException
+     */
+    public function updatePlayer(PlayerId $playerId, string $firstName, string $lastName, int $age, string $position): void
+    {
+        $player = $this->findPlayerById($playerId);
+
+        if (!$player) {
+            throw new PlayerNotFoundException($playerId->getValue());
+        }
+
+        $player->update($firstName, $lastName, $age, $position);
+    }
+
+    /**
+     * @throws PlayerNotFoundException
+     */
+    public function removePlayer(Player $player): void
+    {
+        if ($this->players->contains($player)) {
+            $this->players->removeElement($player);
+            $player->setTeam(null);
+        }else{
+            throw new PlayerNotFoundException($player->getId()->getValue());
+        }
+    }
+
+    /**
+     * @throws InvalidUlidException
+     * @throws InvalidLocationChangeException
+     */
+    public function relocate(string $newCity): void
+    {
+        if ($newCity === $this->city) {
+            throw new InvalidLocationChangeException($this->city, $newCity);
+        }
+
+        $this->city = $newCity;
+
+        $this->recordDomainEvent(new TeamRelocatedEvent($this->getId(), $newCity));
+    }
+
     public function update(string $name, string $city, int $yearFounded, string $stadiumName): void
     {
         $this->name = $name;
@@ -83,44 +156,15 @@ class Team extends AggregateRoot
         $this->stadiumName = $stadiumName;
     }
 
-    public function addPlayer(Player $player): void
-    {
-        if ($this->players->count() >= static::MAX_PLAYERS_COUNT) {
-            throw new \DomainException("A team cannot have more than " . static::MAX_PLAYERS_COUNT . " players.");
-        }
-
-        $this->players[] = $player;
-        $player->setTeam($this);
-    }
-
-    public function removePlayer(Player $player): void
-    {
-        if ($this->players->contains($player)) {
-            $this->players->removeElement($player);
-            $player->setTeam(null);
-        }
-    }
-
-    public function relocate(string $newCity): void
-    {
-        if ($newCity === $this->city) {
-            throw new \DomainException('New location must be different from the current one.');
-        }
-
-        $this->city = $newCity;
-
-        $this->recordDomainEvent(new TeamRelocatedEvent($this->getId(), $newCity));
-    }
-
     public static function create(TeamId $id, string $name, string $city, int $yearFounded, string $stadiumName): Team
     {
-        $article = new self($id);
-        $article->setName($name);
-        $article->setCity($city);
-        $article->setYearFounded($yearFounded);
-        $article->setStadiumName($stadiumName);
+        $team = new self($id);
+        $team->setName($name);
+        $team->setCity($city);
+        $team->setYearFounded($yearFounded);
+        $team->setStadiumName($stadiumName);
 
-        return $article;
+        return $team;
     }
 
 }

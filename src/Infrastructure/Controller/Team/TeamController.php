@@ -2,78 +2,125 @@
 
 namespace App\Infrastructure\Controller\Team;
 
-use App\Application\Command\Team\CreateTeamCommand;
-use App\Application\Command\Team\DeleteTeamCommand;
-use App\Application\Command\Team\RelocateTeamCommand;
-use App\Application\Command\Team\UpdateTeamCommand;
-use App\Application\Query\Team\GetTeamQuery;
-use App\Application\Query\Team\GetTeamsQuery;
+use App\Application\Command\CreateTeamCommand;
+use App\Application\Command\DeleteTeamCommand;
+use App\Application\Command\RelocateTeamCommand;
+use App\Application\Command\UpdateTeamCommand;
+use App\Application\Dto\Request\Team\CreateTeamRequest as CreateTeamRequestDto;
+use App\Application\Dto\Request\Team\RelocateTeamRequest as RelocateTeamRequestDto;
+use App\Application\Dto\Request\Team\UpdateTeamRequest as UpdateTeamRequestDto;
+use App\Application\Query\GetTeamQuery;
+use App\Application\Query\GetTeamsQuery;
 use App\Infrastructure\Controller\AbstractController;
+use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Throwable;
 
 class TeamController extends AbstractController
 {
     public function list(): JsonResponse
     {
-        $teams = $this->queryBus->execute(new GetTeamsQuery());
+        try {
+            $teams = $this->queryBus->execute(new GetTeamsQuery());
 
-        $jsonTeams = $this->serializer->serialize($teams, 'json');
+            return $this->serializeResponse(responseData: $teams);
+        }catch (Throwable $exception){
 
-        return new JsonResponse($jsonTeams, Response::HTTP_OK, [], true);
+            return $this->handleExceptionResponse($exception);
+        }
     }
 
     public function details(string $teamId): JsonResponse
     {
-        $team = $this->queryBus->execute(new GetTeamQuery($teamId));
+        try {
+            $team = $this->queryBus->execute(new GetTeamQuery($teamId));
 
-        $jsonTeam = $this->serializer->serialize($team, 'json');
+            return $this->serializeResponse(responseData: $team);
+        }catch (Throwable $exception){
 
-        return new JsonResponse($jsonTeam, Response::HTTP_OK, [], true);
+            return $this->handleExceptionResponse($exception);
+        }
     }
 
-    public function create(Request $request): JsonResponse
+    public function create(#[MapRequestPayload] CreateTeamRequestDto $requestDto): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $command = new CreateTeamCommand(
-            name: $data['name'],
-            city: $data['city'],
-            yearFounded: $data['yearFounded'],
-            stadiumName: $data['stadiumName']
-        );
+        try {
+            $command = new CreateTeamCommand(
+                name: $requestDto->name,
+                city: $requestDto->city,
+                yearFounded: $requestDto->yearFounded,
+                stadiumName: $requestDto->stadiumName,
+            );
+            $team = $this->commandBus->execute($command);
 
-        $teamId = $this->commandBus->execute($command);
-        return new JsonResponse(['id' => $teamId], Response::HTTP_CREATED);
+            return $this->serializeResponse(
+                responseData: $team,
+                statusCode: Response::HTTP_CREATED
+            );
+        }catch (Throwable $exception){
+
+            return $this->handleExceptionResponse($exception);
+        }
     }
 
-    public function update(string $teamId, Request $request): JsonResponse
+    public function update(
+        #[MapRequestPayload] UpdateTeamRequestDto $requestDto,
+        string                                    $teamId
+    ): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $command = new UpdateTeamCommand(
-            id: $teamId,
-            name: $data['name'],
-            city: $data['city'],
-            yearFounded: $data['yearFounded'],
-            stadiumName: $data['stadiumName']
-        );
+        try {
+            $command = new UpdateTeamCommand(
+                id: $teamId,
+                name: $requestDto->name,
+                city: $requestDto->city,
+                yearFounded: $requestDto->yearFounded,
+                stadiumName: $requestDto->stadiumName,
+            );
+            $team = $this->commandBus->execute($command);
 
-        $this->commandBus->execute($command);
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+            return $this->serializeResponse(
+                responseData: $team,
+            );
+        }catch (Throwable $exception){
+
+            return $this->handleExceptionResponse($exception);
+        }
     }
 
     public function delete(string $teamId): JsonResponse
     {
-        $this->commandBus->execute(new DeleteTeamCommand($teamId));
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        try {
+            $this->commandBus->execute(new DeleteTeamCommand($teamId));
+
+            return $this->serializeResponse(
+                responseData: null,
+                statusCode: Response::HTTP_NO_CONTENT
+            );
+        }catch (Throwable $exception){
+
+            return $this->handleExceptionResponse($exception);
+        }
     }
 
-    public function relocate(string $teamId, Request $request): JsonResponse
+    public function relocate(
+        #[MapRequestPayload] RelocateTeamRequestDto $requestDto,
+        string                                      $teamId
+    ): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $command = new RelocateTeamCommand($teamId, $data['newCity']);
-        $this->commandBus->execute($command);
+        try {
+            $command = new RelocateTeamCommand(
+                teamId: $teamId,
+                city: $requestDto->city
+            );
 
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+            $team = $this->commandBus->execute($command);
+
+            return $this->serializeResponse(responseData: $team);
+        }catch (Throwable $exception){
+
+            return $this->handleExceptionResponse($exception);
+        }
     }
 }

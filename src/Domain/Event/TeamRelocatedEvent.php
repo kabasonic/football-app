@@ -6,7 +6,6 @@ use App\Domain\Models\Team\ValueObject\TeamId;
 use App\Shared\Domain\Event\DomainEventInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
-
 class TeamRelocatedEvent extends Event implements DomainEventInterface
 {
     private TeamId $teamId;

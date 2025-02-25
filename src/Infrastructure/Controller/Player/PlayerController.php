@@ -2,36 +2,114 @@
 
 namespace App\Infrastructure\Controller\Player;
 
-use App\Application\Command\Team\AddPlayerToTeamCommand;
-use App\Application\Command\Team\RemovePlayerFromTeamCommand;
+use App\Application\Command\AddPlayerToTeamCommand;
+use App\Application\Command\RemovePlayerFromTeamCommand;
+use App\Application\Command\UpdatePlayerInTeamCommand;
+use App\Application\Dto\Request\Player\CreatePlayerRequest as CreatePlayerRequestDto;
+use App\Application\Dto\Request\Player\UpdatePlayerRequest as UpdatePlayerRequestDto;
+use App\Application\Query\GetTeamPlayerQuery;
+use App\Application\Query\GetTeamPlayersQuery;
 use App\Infrastructure\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Throwable;
 
 class PlayerController extends AbstractController
 {
 
-    public function add(string $teamId, Request $request): JsonResponse
+    public function list(string $teamId): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $command = new AddPlayerToTeamCommand(
-            teamId: $teamId,
-            firstName: $data['firstName'],
-            lastName: $data['lastName'],
-            age: $data['age'],
-            position: $data['position']
-        );
+        try{
+            $players = $this->queryBus->execute(new GetTeamPlayersQuery(teamId: $teamId));
 
-        $playerId = $this->commandBus->execute($command);
-        return new JsonResponse(['id' => $playerId], Response::HTTP_CREATED);
+            return $this->serializeResponse(responseData: $players);
+        }catch (Throwable $exception){
+
+            return $this->handleExceptionResponse($exception);
+        }
+    }
+
+    public function details(string $teamId, string $playerId): JsonResponse
+    {
+        try{
+            $query = new GetTeamPlayerQuery(teamId: $teamId, playerId: $playerId);
+            $player = $this->queryBus->execute($query);
+
+            return $this->serializeResponse(responseData: $player);
+        }catch (Throwable $exception){
+
+            return $this->handleExceptionResponse($exception);
+        }
+    }
+
+    public function add(
+        #[MapRequestPayload] CreatePlayerRequestDto $requestDto,
+        string $teamId
+    ): JsonResponse
+    {
+        try{
+            $command = new AddPlayerToTeamCommand(
+                teamId: $teamId,
+                firstName: $requestDto->firstName,
+                lastName: $requestDto->lastName,
+                age: $requestDto->age,
+                position: $requestDto->position,
+            );
+
+            $player = $this->commandBus->execute($command);
+
+            return $this->serializeResponse(
+                responseData: $player,
+                statusCode: Response::HTTP_CREATED
+            );
+        }catch (Throwable $exception){
+
+            return $this->handleExceptionResponse($exception);
+        }
+    }
+
+    public function update(
+        #[MapRequestPayload] UpdatePlayerRequestDto $requestDto,
+        string $teamId,
+        string $playerId
+    ): JsonResponse
+    {
+        try{
+            $command = new UpdatePlayerInTeamCommand(
+                teamId: $teamId,
+                playerId: $playerId,
+                firstName: $requestDto->firstName,
+                lastName: $requestDto->lastName,
+                age: $requestDto->age,
+                position: $requestDto->position,
+            );
+
+            $player = $this->commandBus->execute($command);
+
+            return $this->serializeResponse(
+                responseData: $player
+            );
+        }catch (Throwable $exception){
+
+            return $this->handleExceptionResponse($exception);
+        }
     }
 
     public function remove(string $teamId, string $playerId): JsonResponse
     {
-        $command = new RemovePlayerFromTeamCommand($teamId, $playerId);
-        $this->commandBus->execute($command);
+        try{
+            $command = new RemovePlayerFromTeamCommand(
+                teamId: $teamId,
+                playerId: $playerId
+            );
 
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+            $this->commandBus->execute($command);
+
+            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        }catch (Throwable $exception){
+
+            return $this->handleExceptionResponse($exception);
+        }
     }
 }

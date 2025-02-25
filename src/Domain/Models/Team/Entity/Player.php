@@ -57,5 +57,13 @@ class Player
         $this->team = $team;
     }
 
+    public function update(string $firstName, string $lastName, int $age, string $position): void
+    {
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
+        $this->age = $age;
+        $this->position = $position;
+    }
+
 }
 

@@ -24,9 +24,11 @@
         "symfony/runtime": "7.2.*",
         "symfony/serializer": "7.2.*",
         "symfony/uid": "7.2.*",
+        "symfony/validator": "7.2.*",
         "symfony/yaml": "7.2.*"
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^8.2",
         "doctrine/doctrine-fixtures-bundle": "^4.0",
         "fakerphp/faker": "^1.24",
         "liip/test-fixtures-bundle": "^3.0.0",

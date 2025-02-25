@@ -39,6 +39,13 @@ services:
         tags:
             - { name: 'kernel.event_listener', event: 'App\Domain\Event\TeamRelocatedEvent', method: 'handle' }
 
+    App\Infrastructure\EventSubscriber\ExceptionSubscriber:
+        tags:
+            - { name: 'kernel.event_subscriber' }
+
+    App\Application\Validator\CurrentYearValidator:
+        tags: [ 'validator.constraint_validator' ]
+
     App\Application\Service\NotificationService:
         arguments:
             $logger: '@monolog.logger.notification'

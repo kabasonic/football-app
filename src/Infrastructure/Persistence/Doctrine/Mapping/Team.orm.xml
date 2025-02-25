@@ -13,6 +13,10 @@
     <field name="city" length="255"/>
     <field name="yearFounded" type="integer"/>
     <field name="stadiumName" length="255"/>
-    <one-to-many field="players" target-entity="App\Domain\Models\Team\Entity\Player" mapped-by="team"/>
+    <one-to-many field="players" target-entity="App\Domain\Models\Team\Entity\Player" mapped-by="team">
+      <cascade>
+        <cascade-persist/>
+      </cascade>
+    </one-to-many>
   </entity>
 </doctrine-mapping>

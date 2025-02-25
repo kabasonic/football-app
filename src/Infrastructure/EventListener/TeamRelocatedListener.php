@@ -4,9 +4,10 @@ namespace App\Infrastructure\EventListener;
 
 use App\Application\Service\NotificationService;
 use App\Domain\Event\TeamRelocatedEvent;
+use App\Domain\Exception\TeamNotFoundException;
 use App\Domain\Repository\TeamRepositoryInterface;
 
-class TeamRelocatedListener
+readonly class TeamRelocatedListener
 {
 
     public function __construct(
@@ -16,12 +17,20 @@ class TeamRelocatedListener
     {
     }
 
+    /**
+     * @throws TeamNotFoundException
+     */
     public function handle(TeamRelocatedEvent $event): void
     {
         $teamId = $event->getTeamId();
         $newCity = $event->getNewCity();
 
-        $players = $this->teamRepository->findPLayersByTeamId($teamId);
+        $team = $this->teamRepository->findById($teamId);
+        if (!$team) {
+            throw new TeamNotFoundException($teamId->getValue());
+        }
+
+        $players = $team->getPlayers();
 
         foreach ($players as $player) {
             $this->notificationService->sendRelocationNotification(

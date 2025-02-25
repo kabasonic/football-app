@@ -23,17 +23,32 @@ delete_team:
     controller: App\Infrastructure\Controller\Team\TeamController::delete
     methods: [DELETE]
 
+relocate_team:
+    path: /teams/{teamId}/relocate
+    controller: App\Infrastructure\Controller\Team\TeamController::relocate
+    methods: [PUT]
+
+list_players:
+    path: /teams/{teamId}/players
+    controller: App\Infrastructure\Controller\Player\PlayerController::list
+    methods: [GET]
+
+details_player:
+    path: /teams/{teamId}/players/{playerId}
+    controller: App\Infrastructure\Controller\Player\PlayerController::details
+    methods: [GET]
+
 add_player:
     path: /teams/{teamId}/players
     controller: App\Infrastructure\Controller\Player\PlayerController::add
     methods: [POST]
 
+update_player:
+    path: /teams/{teamId}/players/{playerId}
+    controller: App\Infrastructure\Controller\Player\PlayerController::update
+    methods: [PUT]
+
 remove_player:
     path: /teams/{teamId}/players/{playerId}
     controller: App\Infrastructure\Controller\Player\PlayerController::remove
     methods: [DELETE]
-
-relocate_team:
-    path: /teams/{teamId}/relocate
-    controller: App\Infrastructure\Controller\Team\TeamController::relocate
-    methods: [PUT]
