@@ -6,6 +6,10 @@ services:
     tags:
       - { name: 'doctrine.fixture.orm' }
 
+  App\Tests\Resource\Fixtures\PlayerFixtures:
+    tags:
+      - { name: 'doctrine.fixture.orm' }
+
   App\Shared\Infrastructure\Bus\CommandBus:
     public: true
 

@@ -3,6 +3,9 @@
 namespace App\Infrastructure\Controller;
 
 use App\Domain\Exception\InvalidLocationChangeException;
+use App\Domain\Exception\InvalidPlayerAgeException;
+use App\Domain\Exception\InvalidPlayerPositionException;
+use App\Domain\Exception\InvalidTeamYearFoundedException;
 use App\Domain\Exception\InvalidUlidException;
 use App\Domain\Exception\PlayerNotFoundException;
 use App\Domain\Exception\TeamNotFoundException;
@@ -44,10 +47,15 @@ abstract class AbstractController
 
         foreach ($exception->getWrappedExceptions() as $exception) {
             $statusCode = match (true) {
-                $exception instanceof InvalidLocationChangeException => Response::HTTP_BAD_REQUEST,
+                $exception instanceof InvalidLocationChangeException,
+                $exception instanceof InvalidPlayerAgeException,
+                $exception instanceof InvalidPlayerPositionException,
+                $exception instanceof InvalidTeamYearFoundedException,
                 $exception instanceof InvalidUlidException => Response::HTTP_BAD_REQUEST,
-                $exception instanceof PlayerNotFoundException => Response::HTTP_NOT_FOUND,
+
+                $exception instanceof PlayerNotFoundException,
                 $exception instanceof TeamNotFoundException => Response::HTTP_NOT_FOUND,
+
                 $exception instanceof TeamPlayerLimitExceededException => Response::HTTP_CONFLICT,
                 default => $statusCode,
             };

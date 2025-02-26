@@ -5,6 +5,8 @@ namespace App\Application\Handler;
 use App\Application\Dto\TeamDto;
 use App\Application\Dto\TeamPlayerDto;
 use App\Application\Query\GetTeamQuery;
+use App\Domain\Exception\InvalidUlidException;
+use App\Domain\Exception\TeamNotFoundException;
 use App\Domain\Repository\TeamRepositoryInterface;
 use App\Shared\Application\Query\QueryHandlerInterface;
 
@@ -14,9 +16,16 @@ readonly class GetTeamQueryHandler implements QueryHandlerInterface
     {
     }
 
+    /**
+     * @throws InvalidUlidException
+     * @throws TeamNotFoundException
+     */
     public function __invoke(GetTeamQuery $query): TeamDto
     {
         $team = $this->teamRepository->findById($query->getId());
+        if(!$team) {
+            throw new TeamNotFoundException($query->getId());
+        }
 
         return new TeamDto(
             id: $team->getId(),

@@ -39,6 +39,8 @@ readonly class RemovePlayerFromTeamHandler implements CommandHandlerInterface
         }
 
         $team->removePlayer($player);
+
+        $this->teamRepository->removePlayer($player);
         $this->teamRepository->save($team);
     }
 }

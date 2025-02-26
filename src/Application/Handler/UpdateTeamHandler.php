@@ -5,6 +5,7 @@ namespace App\Application\Handler;
 use App\Application\Command\UpdateTeamCommand;
 use App\Application\Dto\TeamDto;
 use App\Application\Dto\TeamPlayerDto;
+use App\Domain\Exception\InvalidTeamYearFoundedException;
 use App\Domain\Exception\InvalidUlidException;
 use App\Domain\Exception\TeamNotFoundException;
 use App\Domain\Models\Team\ValueObject\TeamId;
@@ -21,6 +22,7 @@ readonly class UpdateTeamHandler implements CommandHandlerInterface
     /**
      * @throws TeamNotFoundException
      * @throws InvalidUlidException
+     * @throws InvalidTeamYearFoundedException
      */
     public function __invoke(UpdateTeamCommand $command): TeamDto
     {

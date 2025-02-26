@@ -2,6 +2,7 @@
 
 namespace App\Domain\Repository;
 
+use App\Domain\Models\Team\Entity\Player;
 use App\Domain\Models\Team\Entity\Team;
 use App\Domain\Models\Team\ValueObject\TeamId;
 
@@ -12,4 +13,6 @@ interface TeamRepositoryInterface
     public function findById(TeamId $id): ?Team;
 
     public function delete(Team $team): void;
+
+    public function removePlayer(Player $player): void;
 }

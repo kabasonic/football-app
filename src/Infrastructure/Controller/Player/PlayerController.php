@@ -5,8 +5,7 @@ namespace App\Infrastructure\Controller\Player;
 use App\Application\Command\AddPlayerToTeamCommand;
 use App\Application\Command\RemovePlayerFromTeamCommand;
 use App\Application\Command\UpdatePlayerInTeamCommand;
-use App\Application\Dto\Request\Player\CreatePlayerRequest as CreatePlayerRequestDto;
-use App\Application\Dto\Request\Player\UpdatePlayerRequest as UpdatePlayerRequestDto;
+use App\Application\Dto\Request\Player\PlayerPayloadRequest as PlayerPayloadRequestDto;
 use App\Application\Query\GetTeamPlayerQuery;
 use App\Application\Query\GetTeamPlayersQuery;
 use App\Infrastructure\Controller\AbstractController;
@@ -44,7 +43,7 @@ class PlayerController extends AbstractController
     }
 
     public function add(
-        #[MapRequestPayload] CreatePlayerRequestDto $requestDto,
+        #[MapRequestPayload] PlayerPayloadRequestDto $requestDto,
         string $teamId
     ): JsonResponse
     {
@@ -70,7 +69,7 @@ class PlayerController extends AbstractController
     }
 
     public function update(
-        #[MapRequestPayload] UpdatePlayerRequestDto $requestDto,
+        #[MapRequestPayload] PlayerPayloadRequestDto $requestDto,
         string $teamId,
         string $playerId
     ): JsonResponse

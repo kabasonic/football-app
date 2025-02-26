@@ -1,54 +1,54 @@
 teams_list:
-    path: /teams
+    path: /api/teams
     controller: App\Infrastructure\Controller\Team\TeamController::list
     methods: [GET]
 
 team_details:
-    path: /teams/{teamId}
+    path: /api/teams/{teamId}
     controller: App\Infrastructure\Controller\Team\TeamController::details
     methods: [GET]
 
 create_team:
-    path: /teams
+    path: /api/teams
     controller: App\Infrastructure\Controller\Team\TeamController::create
     methods: [POST]
 
 update_team:
-    path: /teams/{teamId}
+    path: /api/teams/{teamId}
     controller: App\Infrastructure\Controller\Team\TeamController::update
     methods: [PUT]
 
 delete_team:
-    path: /teams/{teamId}
+    path: /api/teams/{teamId}
     controller: App\Infrastructure\Controller\Team\TeamController::delete
     methods: [DELETE]
 
 relocate_team:
-    path: /teams/{teamId}/relocate
+    path: /api/teams/{teamId}/relocate
     controller: App\Infrastructure\Controller\Team\TeamController::relocate
     methods: [PUT]
 
 list_players:
-    path: /teams/{teamId}/players
+    path: /api/teams/{teamId}/players
     controller: App\Infrastructure\Controller\Player\PlayerController::list
     methods: [GET]
 
 details_player:
-    path: /teams/{teamId}/players/{playerId}
+    path: /api/teams/{teamId}/players/{playerId}
     controller: App\Infrastructure\Controller\Player\PlayerController::details
     methods: [GET]
 
 add_player:
-    path: /teams/{teamId}/players
+    path: /api/teams/{teamId}/players
     controller: App\Infrastructure\Controller\Player\PlayerController::add
     methods: [POST]
 
 update_player:
-    path: /teams/{teamId}/players/{playerId}
+    path: /api/teams/{teamId}/players/{playerId}
     controller: App\Infrastructure\Controller\Player\PlayerController::update
     methods: [PUT]
 
 remove_player:
-    path: /teams/{teamId}/players/{playerId}
+    path: /api/teams/{teamId}/players/{playerId}
     controller: App\Infrastructure\Controller\Player\PlayerController::remove
     methods: [DELETE]

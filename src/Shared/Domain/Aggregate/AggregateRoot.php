@@ -23,4 +23,15 @@ abstract class AggregateRoot
 
         return $domainEvents;
     }
+
+    public function hasRecordedDomainEvent(string $eventClass): bool
+    {
+        foreach ($this->domainEvents as $event) {
+            if ($event instanceof $eventClass) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

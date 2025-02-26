@@ -6,13 +6,11 @@ use App\Application\Command\CreateTeamCommand;
 use App\Application\Command\DeleteTeamCommand;
 use App\Application\Command\RelocateTeamCommand;
 use App\Application\Command\UpdateTeamCommand;
-use App\Application\Dto\Request\Team\CreateTeamRequest as CreateTeamRequestDto;
 use App\Application\Dto\Request\Team\RelocateTeamRequest as RelocateTeamRequestDto;
-use App\Application\Dto\Request\Team\UpdateTeamRequest as UpdateTeamRequestDto;
+use App\Application\Dto\Request\Team\TeamPayloadRequest as TeamPayloadRequestDto;
 use App\Application\Query\GetTeamQuery;
 use App\Application\Query\GetTeamsQuery;
 use App\Infrastructure\Controller\AbstractController;
-use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -44,7 +42,7 @@ class TeamController extends AbstractController
         }
     }
 
-    public function create(#[MapRequestPayload] CreateTeamRequestDto $requestDto): JsonResponse
+    public function create(#[MapRequestPayload] TeamPayloadRequestDto $requestDto): JsonResponse
     {
         try {
             $command = new CreateTeamCommand(
@@ -66,7 +64,7 @@ class TeamController extends AbstractController
     }
 
     public function update(
-        #[MapRequestPayload] UpdateTeamRequestDto $requestDto,
+        #[MapRequestPayload] TeamPayloadRequestDto $requestDto,
         string                                    $teamId
     ): JsonResponse
     {

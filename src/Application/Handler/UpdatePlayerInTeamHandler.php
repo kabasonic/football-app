@@ -4,6 +4,8 @@ namespace App\Application\Handler;
 
 use App\Application\Command\UpdatePlayerInTeamCommand;
 use App\Application\Dto\PlayerDto;
+use App\Domain\Exception\InvalidPlayerAgeException;
+use App\Domain\Exception\InvalidPlayerPositionException;
 use App\Domain\Exception\InvalidUlidException;
 use App\Domain\Exception\PlayerNotFoundException;
 use App\Domain\Exception\TeamNotFoundException;
@@ -20,9 +22,13 @@ readonly class UpdatePlayerInTeamHandler implements CommandHandlerInterface
     }
 
     /**
-     * @throws TeamNotFoundException
-     * @throws PlayerNotFoundException
+     * @param UpdatePlayerInTeamCommand $command
+     * @return PlayerDto
      * @throws InvalidUlidException
+     * @throws PlayerNotFoundException
+     * @throws TeamNotFoundException
+     * @throws InvalidPlayerAgeException
+     * @throws InvalidPlayerPositionException
      */
     public function __invoke(UpdatePlayerInTeamCommand $command): PlayerDto
     {

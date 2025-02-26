@@ -4,6 +4,8 @@ namespace App\Application\Handler;
 
 use App\Application\Command\AddPlayerToTeamCommand;
 use App\Application\Dto\PlayerDto;
+use App\Domain\Exception\InvalidPlayerAgeException;
+use App\Domain\Exception\InvalidPlayerPositionException;
 use App\Domain\Exception\InvalidUlidException;
 use App\Domain\Exception\TeamNotFoundException;
 use App\Domain\Exception\TeamPlayerLimitExceededException;
@@ -22,9 +24,13 @@ readonly class AddPlayerToTeamHandler implements CommandHandlerInterface
     }
 
     /**
-     * @throws TeamNotFoundException
+     * @param AddPlayerToTeamCommand $command
+     * @return PlayerDto
      * @throws InvalidUlidException
+     * @throws TeamNotFoundException
      * @throws TeamPlayerLimitExceededException
+     * @throws InvalidPlayerAgeException
+     * @throws InvalidPlayerPositionException
      */
     public function __invoke(AddPlayerToTeamCommand $command): PlayerDto
     {

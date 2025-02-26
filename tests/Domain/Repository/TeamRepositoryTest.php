@@ -2,60 +2,88 @@
 
 namespace App\Tests\Domain\Repository;
 
+use App\Domain\Models\Team\Entity\Player;
 use App\Domain\Models\Team\Entity\Team;
+use App\Domain\Models\Team\ValueObject\TeamId;
 use App\Domain\Repository\TeamRepositoryInterface;
+use App\Shared\Domain\Services\UlidService;
+use App\Tests\Resource\Fixtures\PlayerFixtures;
 use App\Tests\Resource\Fixtures\TeamFixtures;
+use App\Tests\Tools\FakerTools;
+use DAMA\DoctrineTestBundle\Doctrine\DBAL\StaticDriver;
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Liip\TestFixturesBundle\Services\DatabaseTools\AbstractDatabaseTool;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class TeamRepositoryTest extends WebTestCase
+class TeamRepositoryTest extends KernelTestCase
 {
+
+    use FakerTools;
+
     private TeamRepositoryInterface $teamRepository;
-    private DatabaseToolCollection $databaseToolCollection;
+    private AbstractDatabaseTool $databaseTool;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->teamRepository = static::getContainer()->get(TeamRepositoryInterface::class);
-        $this->databaseToolCollection = static::getContainer()->get(DatabaseToolCollection::class);
+
+        $this->teamRepository = self::getContainer()->get(TeamRepositoryInterface::class);
+        $this->databaseTool = self::getContainer()->get(DatabaseToolCollection::class)->get();
+        StaticDriver::setKeepStaticConnections(false);
     }
 
-    public function testCreateTeam(): void
+    public function testSaveTeam(): void
     {
-        $databaseTool = $this->databaseToolCollection->get();
-        $executor = $databaseTool->loadFixtures([TeamFixtures::class]);
+        $team = Team::create(
+            id: new TeamId(UlidService::generate()),
+            name: $this->getFaker()->name(),
+            city: $this->getFaker()->city(),
+            yearFounded: $this->getFaker()->year(),
+            stadiumName: $this->getFaker()->name(),
+        );
+        $this->teamRepository->save($team);
 
+        $foundTeam = $this->teamRepository->findById($team->getId());
+        $this->assertNotNull($foundTeam);
+        $this->assertEquals($team->getId(), $foundTeam->getId());
+    }
+
+    public function testFindById(): void
+    {
+        $executor = $this->databaseTool->loadFixtures([TeamFixtures::class]);
         $team = $executor->getReferenceRepository()->getReference(TeamFixtures::TEAM_1_REFERENCE, Team::class);
 
-        $existingTeam = $this->teamRepository->findById($team->getId());
-
-        $this->assertEquals($team->getId(), $existingTeam->getId());
+        $team = $this->teamRepository->findById($team->getId());
+        $this->assertNotNull($team);
+        $this->assertEquals($team->getId()->getValue(),$team->getId()->getValue());
     }
 
     public function testDeleteTeam(): void
     {
-        $databaseTool = $this->databaseToolCollection->get();
-        $executor = $databaseTool->loadFixtures([TeamFixtures::class]);
-
+        $executor = $this->databaseTool->loadFixtures([TeamFixtures::class]);
         $team = $executor->getReferenceRepository()->getReference(TeamFixtures::TEAM_1_REFERENCE, Team::class);
 
-        $this->teamRepository->delete($team);
+        $team = $this->teamRepository->findById($team->getId());
+        $this->assertNotNull($team);
 
-        $this->getContainer()->get('doctrine')->getManager()->flush();
+        $this->teamRepository->delete($team);
 
         $deletedTeam = $this->teamRepository->findById($team->getId());
         $this->assertNull($deletedTeam);
     }
 
-    public function testFindByIdTeam(): void
+    public function testRemovePlayer(): void
     {
-        $databaseTool = $this->databaseToolCollection->get();
-        $executor = $databaseTool->loadFixtures([TeamFixtures::class]);
+        $executor = $this->databaseTool->loadFixtures([PlayerFixtures::class]);
+        $player = $executor->getReferenceRepository()->getReference(PlayerFixtures::PLAYER_1_REFERENCE, Player::class);
+        $this->assertNotNull($player);
 
-        $team = $executor->getReferenceRepository()->getReference(TeamFixtures::TEAM_1_REFERENCE, Team::class);
+        $teamId = $player->getTeam()->getId();
 
-        $existingTeam = $this->teamRepository->findById($team->getId());
+        $this->teamRepository->removePlayer($player);
 
-        $this->assertEquals($team->getId(), $existingTeam->getId());
+        $team = $this->teamRepository->findById($teamId);
+        $this->assertNotNull($team);
+        $this->assertNull($team->findPlayerById($player->getId()));
     }
 }
